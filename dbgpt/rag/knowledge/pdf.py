@@ -44,34 +44,43 @@ class PDFKnowledge(Knowledge):
         if self._loader:
             documents = self._loader.load()
         else:
-            import pypdf
+            import re
+            import fitz  # PyMuPDF
 
-            pages = []
+            pages_list = []
             documents = []
             if not self._path:
                 raise ValueError("file path is required")
-            with open(self._path, "rb") as file:
-                reader = pypdf.PdfReader(file)
-                for page_num in range(len(reader.pages)):
-                    _page = reader.pages[page_num]
-                    pages.append((_page.extract_text(), page_num))
+
+            pdf_document = fitz.open(self._path)
+
+            for page_num in range(len(pdf_document)):
+                page = pdf_document.load_page(page_num)
+                clip = 50
+                crop = fitz.Rect(0, clip, page.rect.width, page.rect.height - clip)
+                text = page.get_text(clip=crop)
+                pages_list.append((text, page_num))
 
             # cleaned_pages = []
-            for page, page_num in pages:
+            en_lines = []
+            cn_lines = []
+            cleaned_lines = []
+            for page, page_num in pages_list:
                 lines = page.splitlines()
-
-                cleaned_lines = []
                 for line in lines:
-                    if self._language == "en":
-                        words = list(line)  # noqa: F841
+                    # 对分割后的前半句进行判断：是否一半以上都是英文
+                    if len(re.findall(r'[a-zA-Z]', line)) > len(line) / 2:
+                        en_lines.append(line.strip())
                     else:
-                        words = line.split()  # noqa: F841
-                    cleaned_lines.append(line)
-                page = "\n".join(cleaned_lines)
+                        cn_lines.append(line.strip())
+                cleaned_lines = en_lines + cn_lines
+                page = " ".join(cleaned_lines)
                 # cleaned_pages.append(page)
+
                 metadata = {"source": self._path, "page": page_num}
                 if self._metadata:
                     metadata.update(self._metadata)  # type: ignore
+
                 # text = "\f".join(cleaned_pages)
                 document = Document(content=page, metadata=metadata)
                 documents.append(document)

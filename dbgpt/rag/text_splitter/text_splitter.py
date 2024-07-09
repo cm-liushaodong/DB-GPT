@@ -2,6 +2,7 @@
 
 import copy
 import logging
+import re
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Iterable, List, Optional, TypedDict, Union, cast
 
@@ -847,12 +848,12 @@ class SeparatorTextSplitter(CharacterTextSplitter):
         if separator is None:
             separator = self._separator
         if separator:
-            splits = text.split(separator)
+            splits = re.split(separator, text)
         else:
             splits = list(text)
         if self._merge:
             return self._merge_splits(splits, separator, chunk_overlap=0, **kwargs)
-        return list(filter(None, text.split(separator)))
+        return list(filter(None, re.split(separator, text)))
 
 
 @register_resource(
