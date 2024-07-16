@@ -1,12 +1,15 @@
 """Text splitter module for splitting text into chunks."""
 
 import copy
+import json
 import logging
+import re
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Iterable, List, Optional, TypedDict, Union, cast
 
 from dbgpt.core import Chunk, Document
 from dbgpt.core.awel.flow import Parameter, ResourceCategory, register_resource
+from dbgpt.rag.knowledge.unstructrued_element import CleanedMetadata, CleanedElement
 from dbgpt.util.i18n_utils import _
 
 logger = logging.getLogger(__name__)
@@ -847,12 +850,65 @@ class SeparatorTextSplitter(CharacterTextSplitter):
         if separator is None:
             separator = self._separator
         if separator:
-            splits = text.split(separator)
+            splits = re.split(separator, text)
         else:
             splits = list(text)
         if self._merge:
             return self._merge_splits(splits, separator, chunk_overlap=0, **kwargs)
-        return list(filter(None, text.split(separator)))
+        return list(filter(None, re.split(separator, text)))
+
+# chunking
+@register_resource(
+    _("Unstructrued Text Splitter"),
+    "unstructrued_text_splitter",
+    category=ResourceCategory.RAG,
+    parameters=[
+        Parameter.build_from(
+            _("unstructrued max characters"),
+            "unstructrued_max_characters",
+            str,
+            description=_("Hard maximum chunk length."),
+            optional=True,
+            default=1500,
+        ),
+        Parameter.build_from(
+            _("unstructrued overlap"),
+            "unstructrued_overlap",
+            str,
+            description=_("overlap size."),
+            optional=True,
+            default=0,
+        ),
+    ],
+    description=_("use unstructred api to chunk."),
+)
+class UnstructruedTextSplitter(TextSplitter):
+    """The SeparatorTextSplitter class."""
+
+    def __init__(self, unstructrued_max_characters: int = 1500, unstructrued_overlap: int = 0,  **kwargs: Any):
+        """Create a new TextSplitter."""
+        self.max_characters = unstructrued_max_characters
+        self.unstructrued_overlap = unstructrued_overlap
+
+    def split_text(
+        self, text: str, **kwargs
+    ) -> List[str]:
+        """Split incoming text and return chunks."""
+        from unstructured.chunking.basic import chunk_elements
+        chunks = []
+        elements = []
+
+        json_obj_list = json.loads(text)
+        for json_obj in json_obj_list:
+            metadata = CleanedMetadata(json_obj.get('metadata').get('filename'), json_obj.get('metadata').get('page_number'))
+            element = CleanedElement(json_obj.get('element_id'), json_obj.get('type'), json_obj.get('text'), metadata)
+            elements.append(element)
+
+        element_chunks = chunk_elements(elements, max_characters=self.max_characters, overlap=self.unstructrued_overlap)
+        for element in element_chunks:
+            chunks.append(element.text)
+
+        return chunks
 
 
 @register_resource(
