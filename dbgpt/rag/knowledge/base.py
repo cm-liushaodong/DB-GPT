@@ -134,16 +134,28 @@ class ChunkStrategy(Enum):
         UnstructruedTextSplitter,
         [
             {
-                "param_name": "unstructrued_max_characters",
+                "param_name": "max_characters",
                 "param_type": "int",
-                "default_value": 2000,
+                "default_value": 1500,
                 "description": "max characters.",
             },
             {
-                "param_name": "unstructrued_overlap",
+                "param_name": "overlap",
                 "param_type": "int",
                 "default_value": 0,
                 "description": "overlap characters.",
+            },
+            {
+                "param_name": "chunk_element_strategy",
+                "param_type": 'boolean',
+                "default_value": True,
+                "description": "chunking by using chunk_element api.",
+            },
+            {
+                "param_name": "chunk_by_title_strategy",
+                "param_type": 'boolean',
+                "default_value": False,
+                "description": "chunking by using chunk_by_title api.",
             },
         ],
         "unstructured",
