@@ -81,6 +81,19 @@ class DocumentSyncRequest(BaseModel):
     """Custom chunk overlap"""
     chunk_overlap: Optional[int] = None
 
+    """unstructured parameter"""
+    max_characters: Optional[int] = None
+
+    """unstructured parameter"""
+    overlap_characters: Optional[int] = None
+
+    """unstructured parameter"""
+    chunk_element_strategy: Optional[int] = None
+
+    """unstructured parameter"""
+    chunk_by_title_strategy: Optional[int] = None
+
+
 
 class ChunkQueryRequest(BaseModel):
     """id: id"""
