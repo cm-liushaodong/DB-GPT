@@ -8,19 +8,29 @@ from dbgpt.rag.knowledge.base import (
     Knowledge,
     KnowledgeType,
 )
+import json
+from datetime import datetime, timedelta
+
+from unstructured.documents.elements import ElementType
+from unstructured.partition.pdf import partition_pdf
+from unstructured.cleaners.core import clean
+import opencc
+import re
+
+from dbgpt.rag.knowledge.unstructrued_element import CleanedMetadata, CleanedElement
 
 
 class PDFKnowledge(Knowledge):
     """PDF Knowledge."""
 
     def __init__(
-        self,
-        file_path: Optional[str] = None,
-        knowledge_type: KnowledgeType = KnowledgeType.DOCUMENT,
-        loader: Optional[Any] = None,
-        language: Optional[str] = "zh",
-        metadata: Optional[Dict[str, Union[str, List[str]]]] = None,
-        **kwargs: Any,
+            self,
+            file_path: Optional[str] = None,
+            knowledge_type: KnowledgeType = KnowledgeType.DOCUMENT,
+            loader: Optional[Any] = None,
+            language: Optional[str] = "zh",
+            metadata: Optional[Dict[str, Union[str, List[str]]]] = None,
+            **kwargs: Any,
     ) -> None:
         """Create PDF Knowledge with Knowledge arguments.
 
@@ -44,45 +54,47 @@ class PDFKnowledge(Knowledge):
         if self._loader:
             documents = self._loader.load()
         else:
-            import re
-            import fitz  # PyMuPDF
-
-            pages_list = []
+            pages = []
+            page = []
             documents = []
-            if not self._path:
-                raise ValueError("file path is required")
 
-            pdf_document = fitz.open(self._path)
+            elements = partition_pdf(self._path, strategy='hi_res', hi_res_model_name='yolox',
+                                    infer_table_structure=True,
+                                    form_extraction_skip_tables=[], languages=['chi_tra', 'chi_sim', 'eng'],
+                                    include_page_breaks=True)
+            converter = opencc.OpenCC('t2s')
 
-            for page_num in range(len(pdf_document)):
-                page = pdf_document.load_page(page_num)
-                clip = 50
-                crop = fitz.Rect(0, clip, page.rect.width, page.rect.height - clip)
-                text = page.get_text(clip=crop)
-                pages_list.append((text, page_num))
-
-            # cleaned_pages = []
-            en_lines = []
-            cn_lines = []
-            cleaned_lines = []
-            for page, page_num in pages_list:
-                lines = page.splitlines()
-                for line in lines:
-                    # 对分割后的前半句进行判断：是否一半以上都是英文
-                    if len(re.findall(r'[a-zA-Z]', line)) > len(line) / 2:
-                        en_lines.append(line.strip())
+            for element in elements:
+                ele_json = json.loads(json.dumps(element.to_dict(), indent=2))
+                if ele_json.get('type') == ElementType.PAGE_BREAK and page:
+                    pages.append(page)
+                    page = []
+                else:
+                    element_id = ele_json.get('element_id')
+                    element_type = ele_json.get('type')
+                    if ele_json.get('type') in [ElementType.TABLE] and ele_json.get('metadata').get('text_as_html'):
+                        element_text = ele_json.get('metadata').get('text_as_html')
                     else:
-                        cn_lines.append(line.strip())
-                cleaned_lines = en_lines + cn_lines
-                page = " ".join(cleaned_lines)
-                # cleaned_pages.append(page)
+                        element_text = ele_json.get('text')
 
-                metadata = {"source": self._path, "page": page_num}
-                if self._metadata:
-                    metadata.update(self._metadata)  # type: ignore
+                    element_text = clean(element_text)
+                    # 繁体中文转简体中文，后面需要对语言类型(用户输入、chunk的语言进行统一)
+                    element_text = converter.convert(element_text)
+                    page_number = ele_json.get('metadata').get('page_number')
+                    file_name = ele_json.get('metadata').get('filename')
 
-                # text = "\f".join(cleaned_pages)
-                document = Document(content=page, metadata=metadata)
+                    metadata = CleanedMetadata(file_name, page_number)
+                    cleaned_element = CleanedElement(element_id, element_type, element_text, metadata)
+
+                    page.append(cleaned_element.to_dict())
+
+            if page:
+                pages.append(page)
+
+            for index, page in enumerate(pages):
+                page_str = json.dumps(page, indent=2)
+                metadata = {"source": self._path, "page": index}
+                document = Document(content=page_str, metadata=metadata)
                 documents.append(document)
             return documents
         return [Document.langchain2doc(lc_document) for lc_document in documents]
@@ -94,6 +106,7 @@ class PDFKnowledge(Knowledge):
             ChunkStrategy.CHUNK_BY_SIZE,
             ChunkStrategy.CHUNK_BY_PAGE,
             ChunkStrategy.CHUNK_BY_SEPARATOR,
+            ChunkStrategy.CHUNK_BY_UNSTRUCTURED
         ]
 
     @classmethod
@@ -110,3 +123,4 @@ class PDFKnowledge(Knowledge):
     def document_type(cls) -> DocumentType:
         """Document type of PDF."""
         return DocumentType.PDF
+

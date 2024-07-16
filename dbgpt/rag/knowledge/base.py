@@ -12,6 +12,7 @@ from dbgpt.rag.text_splitter.text_splitter import (
     RecursiveCharacterTextSplitter,
     SeparatorTextSplitter,
     TextSplitter,
+    UnstructruedTextSplitter,
 )
 
 
@@ -128,6 +129,27 @@ class ChunkStrategy(Enum):
         "split document by markdown header",
     )
 
+    CHUNK_BY_UNSTRUCTURED: _STRATEGY_ENUM_TYPE = (
+        # zhaoyu93 改为unstructured的切分器,策略模式
+        UnstructruedTextSplitter,
+        [
+            {
+                "param_name": "unstructrued_max_characters",
+                "param_type": "int",
+                "default_value": 2000,
+                "description": "max characters.",
+            },
+            {
+                "param_name": "unstructrued_overlap",
+                "param_type": "int",
+                "default_value": 0,
+                "description": "overlap characters.",
+            },
+        ],
+        "unstructured",
+        "split document by unstructured(a tool)",
+
+    )
     def __init__(self, splitter_class, parameters, alias, description):
         """Create a new ChunkStrategy with the given splitter_class."""
         self.splitter_class = splitter_class
@@ -190,6 +212,7 @@ class Knowledge(ABC):
             ChunkStrategy.CHUNK_BY_PARAGRAPH,
             ChunkStrategy.CHUNK_BY_MARKDOWN_HEADER,
             ChunkStrategy.CHUNK_BY_SEPARATOR,
+            ChunkStrategy.CHUNK_BY_UNSTRUCTURED
         ]
 
     @classmethod
