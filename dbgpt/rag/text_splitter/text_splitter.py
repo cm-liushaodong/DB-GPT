@@ -33,6 +33,10 @@ class TextSplitter(ABC):
             length_function: Callable[[str], int] = len,
             filters=None,
             separator: str = "",
+            max_characters: int = 1500,
+            overlap: int = 0,
+            chunk_element_strategy: bool = True,
+            chunk_by_title_strategy: bool = False,
     ):
         """Create a new TextSplitter."""
         if filters is None:
@@ -47,6 +51,10 @@ class TextSplitter(ABC):
         self._length_function = length_function
         self._filter = filters
         self._separator = separator
+        self._max_characters = max_characters
+        self._overlap = overlap
+        self._chunk_element_strategy = chunk_element_strategy
+        self._chunk_by_title_strategy = chunk_by_title_strategy
 
     @abstractmethod
     def split_text(self, text: str, **kwargs) -> List[str]:

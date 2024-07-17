@@ -25,6 +25,8 @@ MODEL_VERSION_MAPPING = {
     "ERNIE-Bot-8K": "ernie_bot_8k",
     "ERNIE-Bot": "completions",
     "ERNIE-Bot-turbo": "eb-instant",
+    "ERNIE-4.0-Turbo-8K-Preview": "ernie-4.0-8k-preview",
+    "ERNIE-4.0-8K": "ernie-4.0-8k",
 }
 
 _DEFAULT_MODEL = "ERNIE-Bot"

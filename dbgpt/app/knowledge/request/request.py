@@ -85,7 +85,7 @@ class DocumentSyncRequest(BaseModel):
     max_characters: Optional[int] = None
 
     """unstructured parameter"""
-    overlap_characters: Optional[int] = None
+    overlap: Optional[int] = None
 
     """unstructured parameter"""
     chunk_element_strategy: Optional[int] = None
