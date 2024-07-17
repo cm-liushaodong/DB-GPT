@@ -124,7 +124,7 @@ class ChunkParameters(BaseModel):
         description="unstructured chunk size",
     )
 
-    overlap_characters:int = Field(
+    overlap: int = Field(
         default=0,
         description="unstructured overlap size",
     )
@@ -231,7 +231,7 @@ class ChunkManager:
             separator=self._chunk_parameters.separator,
             enable_merge=self._chunk_parameters.enable_merge,
             max_characters=self._chunk_parameters.max_characters,
-            overlap_characters=self._chunk_parameters.overlap_characters,
+            overlap=self._chunk_parameters.overlap,
             chunk_element_strategy=self._chunk_parameters.chunk_element_strategy,
             chunk_by_title_strategy=self._chunk_parameters.chunk_by_title_strategy,
         )
