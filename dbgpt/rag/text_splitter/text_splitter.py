@@ -11,7 +11,7 @@ from unstructured.chunking.title import chunk_by_title
 
 from dbgpt.core import Chunk, Document
 from dbgpt.core.awel.flow import Parameter, ResourceCategory, register_resource
-from dbgpt.rag.knowledge.unstructrued_element import CleanedMetadata, CleanedElement
+from dbgpt.rag.knowledge.unstructrued_element import CleanedMetadata, CleanedElement, custom_chunk_elements
 from dbgpt.util.i18n_utils import _
 
 logger = logging.getLogger(__name__)
@@ -950,11 +950,11 @@ class UnstructruedTextSplitter(TextSplitter):
             elements.append(element)
 
         if self.chunk_strategy == 'chunk_element':
-            element_chunks = chunk_elements(elements, max_characters=self.max_characters, overlap=self.overlap_characters)
-        else:
-            element_chunks = chunk_by_title(elements, max_characters=self.max_characters, overlap=self.overlap_characters)
-        for element in element_chunks:
-            chunks.append(element.text)
+            # 定制化切chunks策略 basic
+            chunks = custom_chunk_elements(elements, max_characters=self.max_characters, overlap=self.overlap_characters)
+        # else:
+        #     # 定制化切chunks策略 by_title
+        #     element_chunks = custom_chunk_by_title()
 
         return chunks
 
