@@ -949,9 +949,10 @@ class UnstructruedTextSplitter(TextSplitter):
             element = CleanedElement(json_obj.get('element_id'), json_obj.get('type'), json_obj.get('text'), metadata)
             elements.append(element)
 
-        if self.chunk_strategy == 'chunk_element':
-            # 定制化切chunks策略 basic
-            chunks = custom_chunk_elements(elements, max_characters=self.max_characters, overlap=self.overlap_characters)
+        # if self.chunk_strategy == 'chunk_element':
+        # 定制化切chunks策略 basic
+        chunks = custom_chunk_elements(elements, max_characters=self.max_characters, overlap=self.overlap_characters)
+
         # else:
         #     # 定制化切chunks策略 by_title
         #     element_chunks = custom_chunk_by_title()
