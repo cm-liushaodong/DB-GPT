@@ -37,8 +37,6 @@ class TextSplitter(ABC):
         length_function: Callable[[str], int] = len,
         filters=None,
         separator: str = "",
-        max_characters: int = 500,
-        overlap: int = 50,
         chunk_element_strategy: bool = True,
         chunk_by_title_strategy: bool = False,
     ):
@@ -55,8 +53,6 @@ class TextSplitter(ABC):
         self._length_function = length_function
         self._filter = filters
         self._separator = separator
-        self._max_characters = max_characters
-        self._overlap = overlap
         self._chunk_element_strategy = chunk_element_strategy
         self._chunk_by_title_strategy = chunk_by_title_strategy
 
@@ -879,20 +875,20 @@ class SeparatorTextSplitter(CharacterTextSplitter):
     category=ResourceCategory.RAG,
     parameters=[
         Parameter.build_from(
-            _("unstructrued max characters"),
-            "max_characters",
+            _("unstructrued chunk_size"),
+            "chunk_size",
             int,
-            description=_("Hard maximum chunk length."),
+            description=_("The size of the data chunks used in processing."),
             optional=True,
-            default=1500,
+            default=500,
         ),
         Parameter.build_from(
-            _("unstructrued overlap"),
-            "overlap",
+            _("unstructrued chunk_overlap"),
+            "chunk_overlap",
             int,
-            description=_("overlap size."),
+            description=_("The amount of overlap between adjacent data chunks."),
             optional=True,
-            default=0,
+            default=50,
         ),
         Parameter.build_from(
             _("chunk element strategy"),
@@ -918,16 +914,16 @@ class UnstructruedTextSplitter(TextSplitter):
 
     def __init__(
         self,
-        max_characters: int = 500,
-        overlap: int = 50,
+        chunk_size: int = 500,
+        chunk_overlap: int = 50,
         chunk_element_strategy: bool = True,
         chunk_by_title_strategy: bool = False,
         **kwargs: Any,
     ):
         """Create a new TextSplitter."""
         self.chunk_strategy = "chunk_element"
-        self.max_characters = max_characters
-        self.overlap_characters = overlap
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
         self.chunk_element_strategy = chunk_element_strategy
         self.chunk_by_title_strategy = chunk_by_title_strategy
 
@@ -966,8 +962,8 @@ class UnstructruedTextSplitter(TextSplitter):
             elements.append(element)
         chunks = custom_chunk_elements(
             elements,
-            max_characters=self.max_characters,
-            overlap=self.overlap_characters,
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
         )
 
         return chunks

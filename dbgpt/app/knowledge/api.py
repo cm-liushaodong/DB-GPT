@@ -257,8 +257,6 @@ async def document_sync(
             chunk_strategy="Automatic",
             chunk_size=request.chunk_size or 512,
             chunk_overlap=request.chunk_overlap or 50,
-            max_characters=request.max_characters or 500,
-            overlap=request.overlap or 100,
             chunk_element_strategy=request.chunk_element_strategy or True,
             chunk_by_title_strategy=request.chunk_by_title_strategy or False,
         )

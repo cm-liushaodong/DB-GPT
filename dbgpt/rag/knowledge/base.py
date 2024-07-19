@@ -133,16 +133,16 @@ class ChunkStrategy(Enum):
         UnstructruedTextSplitter,
         [
             {
-                "param_name": "max_characters",
+                "param_name": "chunk_size",
                 "param_type": "int",
                 "default_value": 500,
-                "description": "max characters.",
+                "description": "The size of the data chunks used in processing.",
             },
             {
-                "param_name": "overlap",
+                "param_name": "chunk_overlap",
                 "param_type": "int",
                 "default_value": 50,
-                "description": "overlap characters.",
+                "description": "The amount of overlap between adjacent data chunks.",
             },
             {
                 "param_name": "chunk_element_strategy",

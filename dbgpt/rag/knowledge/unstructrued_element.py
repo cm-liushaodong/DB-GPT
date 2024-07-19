@@ -36,8 +36,8 @@ class CleanedMetadata(ElementMetadata):
 def custom_chunk_elements(
     elements: Iterable[CleanedElement],
     combine_text_under_n_chars: Optional[int] = 300,
-    max_characters: Optional[int] = None,
-    overlap: Optional[int] = None,
+    chunk_size: Optional[int] = None,
+    chunk_overlap: Optional[int] = None,
 ):
     chunks = []
     chunk = ""
@@ -60,12 +60,12 @@ def custom_chunk_elements(
 
             del chunks[title_index:]
             chunks.append(table_text)
-        elif len(element.text) > max_characters:
+        elif len(element.text) > chunk_size:
             if chunk:
                 chunks.append(chunk)
                 chunk = ""
-            chunks.extend(split_element(element, max_characters, overlap))
-        elif len(chunk) + len(element.text) > max_characters:
+            chunks.extend(split_element(element, chunk_size, chunk_overlap))
+        elif len(chunk) + len(element.text) > chunk_size:
             chunks.append(chunk)
             chunk = ""
         else:
@@ -73,21 +73,21 @@ def custom_chunk_elements(
             if index == len(list(elements)) - 1 and chunk:
                 chunks.append(chunk)
     if combine_text_under_n_chars:
-        chunks = combine_short_text(chunks, combine_text_under_n_chars, max_characters)
+        chunks = combine_short_text(chunks, combine_text_under_n_chars, chunk_size)
 
     return chunks
 
 
-def split_element(element: CleanedElement, max_characters: int, overlap: int):
+def split_element(element: CleanedElement, chunk_size: int, chunk_overlap: int):
     start = 0
     end = len(element.text)
     cursor = start
 
     splits = []
 
-    while cursor + max_characters < end:
-        splits.append(element.text[cursor : cursor + max_characters])
-        cursor += max_characters - overlap
+    while cursor + chunk_size < end:
+        splits.append(element.text[cursor : cursor + chunk_size])
+        cursor += chunk_size - chunk_overlap
 
     if cursor < end:
         splits.append(element.text[cursor:])
@@ -96,13 +96,13 @@ def split_element(element: CleanedElement, max_characters: int, overlap: int):
 
 
 def combine_short_text(
-    chunks: Iterable[str], combine_text_under_n_chars: int, max_characters: int
+    chunks: Iterable[str], combine_text_under_n_chars: int, chunk_size: int
 ):
     result_chunks = []
     current_chunk = ""
 
     for chunk in chunks:
-        if len(chunk) + len(current_chunk) <= max_characters:
+        if len(chunk) + len(current_chunk) <= chunk_size:
             if len(current_chunk) < combine_text_under_n_chars:
                 current_chunk += " " + chunk
             else:
