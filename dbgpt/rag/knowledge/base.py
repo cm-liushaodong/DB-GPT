@@ -135,13 +135,13 @@ class ChunkStrategy(Enum):
             {
                 "param_name": "max_characters",
                 "param_type": "int",
-                "default_value": 1500,
+                "default_value": 500,
                 "description": "max characters.",
             },
             {
                 "param_name": "overlap",
                 "param_type": "int",
-                "default_value": 0,
+                "default_value": 50,
                 "description": "overlap characters.",
             },
             {

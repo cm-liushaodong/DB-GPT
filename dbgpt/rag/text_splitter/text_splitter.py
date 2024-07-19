@@ -37,8 +37,8 @@ class TextSplitter(ABC):
         length_function: Callable[[str], int] = len,
         filters=None,
         separator: str = "",
-        max_characters: int = 1500,
-        overlap: int = 0,
+        max_characters: int = 500,
+        overlap: int = 50,
         chunk_element_strategy: bool = True,
         chunk_by_title_strategy: bool = False,
     ):
@@ -918,8 +918,8 @@ class UnstructruedTextSplitter(TextSplitter):
 
     def __init__(
         self,
-        max_characters: int = 1500,
-        overlap: int = 0,
+        max_characters: int = 500,
+        overlap: int = 50,
         chunk_element_strategy: bool = True,
         chunk_by_title_strategy: bool = False,
         **kwargs: Any,
