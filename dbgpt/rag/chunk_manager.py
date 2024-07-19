@@ -129,15 +129,14 @@ class ChunkParameters(BaseModel):
         description="unstructured overlap size",
     )
 
-    chunk_element_strategy:bool = Field(
-        default=True,
-        description='unstructured chunk element strategy'
+    chunk_element_strategy: bool = Field(
+        default=True, description="unstructured chunk element strategy"
     )
 
-    chunk_by_title_strategy:bool = Field(
-        default=True,
-        description='unstructured chunk by title strategy'
+    chunk_by_title_strategy: bool = Field(
+        default=True, description="unstructured chunk by title strategy"
     )
+
 
 class ChunkManager:
     """Manager for chunks."""

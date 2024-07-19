@@ -94,7 +94,6 @@ class DocumentSyncRequest(BaseModel):
     chunk_by_title_strategy: Optional[int] = None
 
 
-
 class ChunkQueryRequest(BaseModel):
     """id: id"""
 

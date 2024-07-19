@@ -130,7 +130,6 @@ class ChunkStrategy(Enum):
     )
 
     CHUNK_BY_UNSTRUCTURED: _STRATEGY_ENUM_TYPE = (
-        # zhaoyu93 改为unstructured的切分器,策略模式
         UnstructruedTextSplitter,
         [
             {
@@ -147,21 +146,21 @@ class ChunkStrategy(Enum):
             },
             {
                 "param_name": "chunk_element_strategy",
-                "param_type": 'boolean',
+                "param_type": "boolean",
                 "default_value": True,
                 "description": "chunking by using chunk_element api.",
             },
             {
                 "param_name": "chunk_by_title_strategy",
-                "param_type": 'boolean',
+                "param_type": "boolean",
                 "default_value": False,
                 "description": "chunking by using chunk_by_title api.",
             },
         ],
         "unstructured",
         "split document by unstructured(a tool)",
-
     )
+
     def __init__(self, splitter_class, parameters, alias, description):
         """Create a new ChunkStrategy with the given splitter_class."""
         self.splitter_class = splitter_class
@@ -224,7 +223,7 @@ class Knowledge(ABC):
             ChunkStrategy.CHUNK_BY_PARAGRAPH,
             ChunkStrategy.CHUNK_BY_MARKDOWN_HEADER,
             ChunkStrategy.CHUNK_BY_SEPARATOR,
-            ChunkStrategy.CHUNK_BY_UNSTRUCTURED
+            ChunkStrategy.CHUNK_BY_UNSTRUCTURED,
         ]
 
     @classmethod
