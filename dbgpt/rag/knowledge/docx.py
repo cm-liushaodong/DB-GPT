@@ -3,7 +3,6 @@ import json
 import re
 from typing import Any, Dict, List, Optional, Union
 
-import docx
 import opencc
 from unstructured.cleaners.core import clean
 from unstructured.documents.elements import ElementType

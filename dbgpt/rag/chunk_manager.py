@@ -119,13 +119,6 @@ class ChunkParameters(BaseModel):
         description="enable chunk merge by chunk_size.",
     )
 
-    chunk_element_strategy: bool = Field(
-        default=True, description="unstructured chunk element strategy"
-    )
-
-    chunk_by_title_strategy: bool = Field(
-        default=True, description="unstructured chunk by title strategy"
-    )
 
 
 class ChunkManager:
@@ -219,6 +212,4 @@ class ChunkManager:
             chunk_overlap=self._chunk_parameters.chunk_overlap,
             separator=self._chunk_parameters.separator,
             enable_merge=self._chunk_parameters.enable_merge,
-            chunk_element_strategy=self._chunk_parameters.chunk_element_strategy,
-            chunk_by_title_strategy=self._chunk_parameters.chunk_by_title_strategy,
         )

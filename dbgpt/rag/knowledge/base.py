@@ -12,7 +12,7 @@ from dbgpt.rag.text_splitter.text_splitter import (
     RecursiveCharacterTextSplitter,
     SeparatorTextSplitter,
     TextSplitter,
-    UnstructruedTextSplitter,
+    UnstructuredTextSplitter
 )
 
 
@@ -130,7 +130,7 @@ class ChunkStrategy(Enum):
     )
 
     CHUNK_BY_UNSTRUCTURED: _STRATEGY_ENUM_TYPE = (
-        UnstructruedTextSplitter,
+        UnstructuredTextSplitter,
         [
             {
                 "param_name": "chunk_size",
@@ -144,21 +144,9 @@ class ChunkStrategy(Enum):
                 "default_value": 50,
                 "description": "The amount of overlap between adjacent data chunks.",
             },
-            {
-                "param_name": "chunk_element_strategy",
-                "param_type": "boolean",
-                "default_value": True,
-                "description": "chunking by using chunk_element api.",
-            },
-            {
-                "param_name": "chunk_by_title_strategy",
-                "param_type": "boolean",
-                "default_value": False,
-                "description": "chunking by using chunk_by_title api.",
-            },
         ],
-        "unstructured",
-        "split document by unstructured(a tool)",
+        "ocr",
+        "split document by ocr(accurate by slow)",
     )
 
     def __init__(self, splitter_class, parameters, alias, description):

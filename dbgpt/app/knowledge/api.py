@@ -257,8 +257,6 @@ async def document_sync(
             chunk_strategy="Automatic",
             chunk_size=request.chunk_size or 512,
             chunk_overlap=request.chunk_overlap or 50,
-            chunk_element_strategy=request.chunk_element_strategy or True,
-            chunk_by_title_strategy=request.chunk_by_title_strategy or False,
         )
         doc_ids = await service.sync_document(requests=[sync_request])
         return Result.succ(doc_ids)

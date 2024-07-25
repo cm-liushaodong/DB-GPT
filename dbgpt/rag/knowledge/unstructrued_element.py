@@ -34,10 +34,10 @@ class CleanedMetadata(ElementMetadata):
 
 
 def custom_chunk_elements(
-    elements: Iterable[CleanedElement],
-    combine_text_under_n_chars: Optional[int] = 300,
-    chunk_size: Optional[int] = None,
-    chunk_overlap: Optional[int] = None,
+        elements: Iterable[CleanedElement],
+        combine_text_under_n_chars: Optional[int] = 300,
+        chunk_size: Optional[int] = None,
+        chunk_overlap: Optional[int] = None,
 ):
     chunks = []
     chunk = ""
@@ -86,7 +86,7 @@ def split_element(element: CleanedElement, chunk_size: int, chunk_overlap: int):
     splits = []
 
     while cursor + chunk_size < end:
-        splits.append(element.text[cursor : cursor + chunk_size])
+        splits.append(element.text[cursor: cursor + chunk_size])
         cursor += chunk_size - chunk_overlap
 
     if cursor < end:
@@ -96,7 +96,7 @@ def split_element(element: CleanedElement, chunk_size: int, chunk_overlap: int):
 
 
 def combine_short_text(
-    chunks: Iterable[str], combine_text_under_n_chars: int, chunk_size: int
+        chunks: Iterable[str], combine_text_under_n_chars: int, chunk_size: int
 ):
     result_chunks = []
     current_chunk = ""
