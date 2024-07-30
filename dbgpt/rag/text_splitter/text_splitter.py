@@ -37,8 +37,6 @@ class TextSplitter(ABC):
         length_function: Callable[[str], int] = len,
         filters=None,
         separator: str = "",
-        chunk_element_strategy: bool = True,
-        chunk_by_title_strategy: bool = False,
     ):
         """Create a new TextSplitter."""
         if filters is None:
@@ -53,8 +51,6 @@ class TextSplitter(ABC):
         self._length_function = length_function
         self._filter = filters
         self._separator = separator
-        self._chunk_element_strategy = chunk_element_strategy
-        self._chunk_by_title_strategy = chunk_by_title_strategy
 
     @abstractmethod
     def split_text(self, text: str, **kwargs) -> List[str]:
@@ -870,12 +866,12 @@ class SeparatorTextSplitter(CharacterTextSplitter):
 
 # chunking
 @register_resource(
-    _("Unstructrued Text Splitter"),
-    "unstructrued_text_splitter",
+    _("Unstructured Text Splitter"),
+    "unstructured_text_splitter",
     category=ResourceCategory.RAG,
     parameters=[
         Parameter.build_from(
-            _("unstructrued chunk_size"),
+            _("unstructured chunk_size"),
             "chunk_size",
             int,
             description=_("The size of the data chunks used in processing."),
@@ -883,68 +879,33 @@ class SeparatorTextSplitter(CharacterTextSplitter):
             default=500,
         ),
         Parameter.build_from(
-            _("unstructrued chunk_overlap"),
+            _("unstructured chunk_overlap"),
             "chunk_overlap",
             int,
             description=_("The amount of overlap between adjacent data chunks."),
             optional=True,
             default=50,
         ),
-        Parameter.build_from(
-            _("chunk element strategy"),
-            "chunk_element_strategy",
-            bool,
-            description=_("chunking by using chunk_element api."),
-            optional=True,
-            default=True,
-        ),
-        Parameter.build_from(
-            _("chunk by title strategy"),
-            "chunk_by_title_strategy",
-            bool,
-            description=_("chunking by using chunk_by_title api."),
-            optional=True,
-            default=False,
-        ),
     ],
-    description=_("use unstructred api to chunk."),
+    description=_("use unstructured api to chunk."),
 )
-class UnstructruedTextSplitter(TextSplitter):
+class UnstructuredTextSplitter(TextSplitter):
     """The SeparatorTextSplitter class."""
 
     def __init__(
         self,
         chunk_size: int = 500,
         chunk_overlap: int = 50,
-        chunk_element_strategy: bool = True,
-        chunk_by_title_strategy: bool = False,
         **kwargs: Any,
     ):
         """Create a new TextSplitter."""
         self.chunk_strategy = "chunk_element"
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.chunk_element_strategy = chunk_element_strategy
-        self.chunk_by_title_strategy = chunk_by_title_strategy
 
     def split_text(self, text: str, **kwargs) -> List[str]:
-        if self.chunk_element_strategy and self.chunk_by_title_strategy:
-            raise ValueError(
-                "Cannot use both chunk_element and chunk_by_title strategies."
-            )
-        if (
-            self.chunk_element_strategy == False
-            and self.chunk_by_title_strategy == False
-        ):
-            raise ValueError("You must choose one of the strategies.")
-        self.chunk_strategy = (
-            "chunk_element" if self.chunk_element_strategy else "chunk_by_title"
-        )
 
         """Split incoming text and return chunks."""
-        from unstructured.chunking.basic import chunk_elements
-
-        chunks = []
         elements = []
 
         json_obj_list = json.loads(text)
@@ -960,6 +921,7 @@ class UnstructruedTextSplitter(TextSplitter):
                 metadata,
             )
             elements.append(element)
+
         chunks = custom_chunk_elements(
             elements,
             chunk_size=self.chunk_size,

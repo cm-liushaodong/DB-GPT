@@ -2,8 +2,9 @@
 import json
 import re
 from typing import Any, Dict, List, Optional, Union
+from docx.opc.pkgreader import _SerializedRelationships, _SerializedRelationship
+from docx.opc.oxml import parse_xml
 
-import docx
 import opencc
 from unstructured.cleaners.core import clean
 from unstructured.documents.elements import ElementType
@@ -19,6 +20,21 @@ from dbgpt.rag.knowledge.base import (
 )
 from dbgpt.rag.knowledge.unstructrued_element import CleanedMetadata, CleanedElement
 
+
+def load_from_xml_v2(baseURI, rels_item_xml):
+    """
+    Return |_SerializedRelationships| instance loaded with the
+    relationships contained in *rels_item_xml*. Returns an empty
+    collection if *rels_item_xml* is |None|.
+    """
+    srels = _SerializedRelationships()
+    if rels_item_xml is not None:
+        rels_elm = parse_xml(rels_item_xml)
+        for rel_elm in rels_elm.Relationship_lst:
+            if rel_elm.target_ref in ('../NULL', 'NULL'):
+                continue
+            srels._srels.append(_SerializedRelationship(baseURI, rel_elm))
+    return srels
 
 class DocxKnowledge(Knowledge):
     """Docx Knowledge."""
@@ -48,7 +64,6 @@ class DocxKnowledge(Knowledge):
             **kwargs,
         )
         self._encoding = encoding
-
     def _load(self) -> List[Document]:
         """Load docx document from loader."""
         if self._loader:
@@ -58,6 +73,8 @@ class DocxKnowledge(Knowledge):
             page = []
             documents = []
             pattern = re.compile(r"[\u4e00-\u9fa5]")
+
+            _SerializedRelationships.load_from_xml = load_from_xml_v2
 
             if self._path.endswith(".docx"):
                 elements = partition_docx(
