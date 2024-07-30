@@ -77,9 +77,16 @@ class TextSplitter(ABC):
         texts = []
         metadatas = []
         for doc in documents:
-            # Iterable just supports one iteration
-            texts.append(doc.content)
+            if not isinstance(self, UnstructuredTextSplitter):
+                page_str = doc.content
+                page_str_json = json.loads(page_str)
+                texts.append("".join([item['text'] for item in page_str_json]))
+            else:
+                # Iterable just supports one iteration
+                texts.append(doc.content)
+
             metadatas.append(doc.metadata)
+
         return self.create_documents(texts, metadatas, **kwargs)
 
     def _join_docs(self, docs: List[str], separator: str, **kwargs) -> Optional[str]:
