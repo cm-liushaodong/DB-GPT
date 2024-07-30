@@ -98,7 +98,7 @@ class DocxKnowledge(Knowledge):
             converter = opencc.OpenCC("t2s")
 
             for element in elements:
-                ele_json = json.loads(json.dumps(element.to_dict(), indent=2))
+                ele_json = json.loads(json.dumps(element.to_dict(), indent=2, ensure_ascii=False))
                 if ele_json.get("type") == ElementType.PAGE_BREAK and page:
                     pages.append(page)
                     page = []
@@ -141,7 +141,7 @@ class DocxKnowledge(Knowledge):
                 pages.append(page)
 
             for index, page in enumerate(pages):
-                page_str = json.dumps(page, indent=2)
+                page_str = json.dumps(page, indent=2, ensure_ascii=False)
                 metadata = {"source": self._path}
                 document = Document(content=page_str, metadata=metadata)
                 documents.append(document)
